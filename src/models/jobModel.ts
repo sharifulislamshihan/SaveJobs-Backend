@@ -22,7 +22,6 @@ const jobSchema: Schema = new Schema(
         sourceLink: { type: String, default: '' },
         applyLink: { type: String, default: '' },
         hrEmail: { type: String, default: 'hr@company.com' },
-        user: { type: Schema.Types.ObjectId, ref: 'User', required: true }
     },
     { timestamps: true }
 );

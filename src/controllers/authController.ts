@@ -14,7 +14,7 @@ export const registerUser = async (req: Request, res: Response) => {
         const existingUser = await UserModel.findOne({ email });
         if (existingUser) {
             // sending response
-            return sendResponse(res, 400, false, "User already Exist")
+            return sendResponse(res, 400, false, "Email already in use")
         }
 
 
@@ -33,6 +33,7 @@ export const registerUser = async (req: Request, res: Response) => {
             verificationCode,
             verificationCodeExpiration,
             isVerified: false,
+            authMethod: "email-password",
         });
         await newUser.save();
 
@@ -92,7 +93,7 @@ export const verifyCode = async (req: Request, res: Response) => {
 }
 
 
-// Resend Verfication code
+// Resend Verification code
 export const resendVerificationCodeEmail = async (req: Request, res: Response) => {
     const {name, email } = req.body;
     try {
