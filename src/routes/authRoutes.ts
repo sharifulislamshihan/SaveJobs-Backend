@@ -1,5 +1,5 @@
 import express from 'express';
-import { registerUser, resendVerificationCodeEmail, verifyCode } from '../controllers/authController';
+import { login, logout, registerUser, resendVerificationCodeEmail, verifyCode } from '../controllers/authController';
 
 
 const authRouter = express.Router();
@@ -12,5 +12,9 @@ authRouter.post('/verify', verifyCode);
 
 // Resend verification code route
 authRouter.post('/resend-code', resendVerificationCodeEmail);
+
+// Login
+authRouter.post('/login', login);
+authRouter.post('/logout', logout);
 
 export default authRouter;

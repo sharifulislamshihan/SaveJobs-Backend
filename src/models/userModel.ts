@@ -34,7 +34,6 @@ const userSchema: Schema<IUser> = new Schema(
         },
         googleId: { type: String, default: null }, // For Google Sign-In (future scope)
         jobs: [{ type: Schema.Types.ObjectId, ref: 'Job' }],
-        jobHistory: [{ type: Schema.Types.ObjectId, ref: 'Job' }],
     },
     { timestamps: true }
 );

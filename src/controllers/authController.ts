@@ -1,9 +1,11 @@
+import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
-import { Request, Response } from "express";
+import { Request, response, Response } from "express";
 import UserModel, { IUser } from "../models/userModel";
 import { sendResponse } from "../utils/sendResponse";
-import { generateVerificationCode } from '../utils/jwtUtils';
+import { generateAccessToken, generateRefreshToken, generateVerificationCode } from '../utils/jwtUtils';
 import { sendVerificationCodeEmail } from '../utils/sendVerificationCode';
+
 
 // register and send verification code
 export const registerUser = async (req: Request, res: Response) => {
@@ -95,7 +97,7 @@ export const verifyCode = async (req: Request, res: Response) => {
 
 // Resend Verification code
 export const resendVerificationCodeEmail = async (req: Request, res: Response) => {
-    const {name, email } = req.body;
+    const { name, email } = req.body;
     try {
         // Find the user by email
         const user = await UserModel.findOne({ email });
@@ -119,10 +121,81 @@ export const resendVerificationCodeEmail = async (req: Request, res: Response) =
         // sending verification email again
         sendVerificationCodeEmail(name, email, verificationCode);
 
-        
+
 
     } catch (error) {
         console.error("Error in Resend verification code", error);
         return sendResponse(res, 500, false, 'Server Error.. Send the Email Again')
     }
 }
+
+
+
+// Login
+
+export const login = async (req: Request, res: Response): Promise<void> => {
+    const { email, password } = req.body;
+
+    try {
+        // Check if user exists
+        const user = await UserModel.findOne({ email });
+        if (!user) {
+            return sendResponse(res, 401, false, 'Invalid email or password')
+        }
+
+        // Check if user is verified
+        if (!user.isVerified) {
+            return sendResponse(res, 403, false, 'Please verify your email before logging in')
+        }
+
+        // Compare passwords
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return sendResponse(res, 401, false, 'Invalid email or password')
+        }
+
+        // Generate tokens
+        const accessToken = generateAccessToken(user._id as string);
+        const refreshToken = generateRefreshToken(user._id as string);
+
+        // Set refresh token in cookie
+        res.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            sameSite: 'strict',
+            maxAge: 15 * 24 * 60 * 60 * 1000, // 15 days
+        });
+
+        // Send response
+        res.status(200).json({
+            message: 'Login successful',
+            accessToken,
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                image: user?.image,
+            },
+        });
+    } catch (error) {
+        console.error(error);
+        return sendResponse(res, 500, false, 'Internal server error while loggedin')
+    }
+};
+
+
+
+// Logout
+
+export const logout = async (req: Request, res: Response) => {
+    try {
+        // Clear the refresh token cookie
+        res.clearCookie('refreshToken', {
+            httpOnly: true,
+            sameSite: 'strict',
+        });
+
+        res.status(200).json({ message: 'Logout successful.' });
+    } catch (error) {
+        res.status(500).json({ message: 'Internal server error.', error });
+    }
+};
