@@ -1,12 +1,21 @@
 import { Request, Response, NextFunction } from 'express';
 import { verifyToken } from '../utils/jwtUtils';
 import { jwtSecret } from '../secret';
+import { sendResponse } from '../utils/sendResponse';
 
-export const authenticate = (req: Request, res: Response, next: NextFunction) => {
+interface AuthRequest extends Request {
+    user?: {
+        id: string;
+        email: string;
+        name: string;
+    };
+}
+
+export const authenticate = (req: AuthRequest, res: Response, next: NextFunction) => {
     const token = req.headers.authorization?.split(' ')[1]; // Bearer <token>
 
     if (!token) {
-        return res.status(401).json({ message: 'Unauthorized: No token provided.' });
+        return sendResponse(res, 401, false, 'Unauthorized: No token provided.');
     }
 
     try {
@@ -14,6 +23,6 @@ export const authenticate = (req: Request, res: Response, next: NextFunction) =>
         (req as any).user = decoded; // Attach user info to request
         next();
     } catch (error) {
-        return res.status(401).json({ message: 'Unauthorized: Invalid token.' });
+        return sendResponse(res, 401, false, 'Unauthorized: Invalid token.')
     }
 }
