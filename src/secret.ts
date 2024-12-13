@@ -17,6 +17,8 @@ const refreshSecret: string | undefined = process.env.REFRESH_TOKEN_KEY;
 const smtpHost: string | undefined = process.env.SMTP_HOST;
 const smtpPort: string | undefined = process.env.SMTP_PORT;
 
+const geminiApi: string | undefined = process.env.GEMINI_API
+
 
 
 export{
@@ -26,4 +28,5 @@ export{
     smtpHost,
     smtpPort,
     refreshSecret,
+    geminiApi
 }

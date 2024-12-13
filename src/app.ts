@@ -2,6 +2,7 @@ import express, { Express, NextFunction, Request, Response } from "express";
 import dotenv from "dotenv";
 import { errorResponse } from "./utils/errorResponse";
 import authRouter from "./routes/authRoutes";
+import geminiRouter from "./routes/geminiRoutes";
 const cors = require('cors');
 
 dotenv.config();
@@ -16,6 +17,9 @@ app.use(express.json());
 
 // Routes
 app.use('/auth', authRouter);
+
+
+app.use('/ai', geminiRouter);
 
 
 

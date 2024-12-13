@@ -21,7 +21,9 @@ const jobSchema: Schema = new Schema(
         applicationLink: { type: String, default: '' },
         sourceLink: { type: String, default: '' },
         applyLink: { type: String, default: '' },
+        instruction: {type: String, default: ''},
         hrEmail: { type: String, default: 'hr@company.com' },
+        notes: {type: String, default: ''}
     },
     { timestamps: true }
 );
