@@ -1,9 +1,11 @@
 import { Request, Response } from "express";
 import { analyzeData } from "../models/geminiModel";
 import { sendResponse } from "../utils/sendResponse";
+import { createJobForUser } from "./jobController";
+import { AuthenticatedRequest } from "../customType/types";
 
-export const processGeminiRequest = async (req: Request, res: Response): Promise<void> => {
-    const { prompt } = req.body;    
+export const processGeminiRequest = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    const { prompt } = req.body;
 
     if (!prompt) {
         //res.status(400).json({ error: "Prompt is required." });
@@ -11,9 +13,25 @@ export const processGeminiRequest = async (req: Request, res: Response): Promise
     }
 
     try {
-        console.log(prompt);
-        
+        //console.log(prompt);
+
         const result = await analyzeData(prompt);
+
+
+        // Assuming you have a user object attached to the request from the authentication middleware
+        //const user = (req as any).user;
+
+        // Use user information added by the middleware
+        const user = req.user;
+
+        if (!user) {
+            return sendResponse(res, 401, false, "User information is missing.");
+        }
+
+        console.log("User info in processGeminiRequest:", user); // Debug log
+
+        // Save the job to the user's document
+        await createJobForUser(user.id, result); // Pass user ID and the generated job data
         //res.status(200).json({ result });
         return sendResponse(res, 200, true, result)
     } catch (error: any) {

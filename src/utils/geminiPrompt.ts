@@ -64,7 +64,6 @@ If the input is valid, extract and organize the following fields:
 "{{input}}"
 
 ### Your Output Should Look Like:
-\`\`\`json
 {
   "company": "Company Name",
   "position": "Job Title",
@@ -90,5 +89,4 @@ If the input is valid, extract and organize the following fields:
   "hrEmail": "hr@example.com",
   "notes": "Training provided for the first 2 months."
 }
-\`\`\`
 `.trim();

@@ -25,8 +25,13 @@ export const analyzeData = async (inputText: string): Promise<string> => {
 
         // Get the message from the result
         const generatedMessage = result?.response?.text() || "Response text unavailable. Try again!";
-        console.log(generatedMessage);
-        return generatedMessage;
+        // clean this data
+        const cleanJsonString = generatedMessage.trim().replace(/^```json|```$/g, '');
+        // converting into js object
+        const jobData = JSON.parse(cleanJsonString);
+
+        console.log(jobData);
+        return jobData;
         
     } catch (error: any) {
         console.error("Error contacting Gemini API:", error.message);
