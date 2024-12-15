@@ -23,11 +23,35 @@ const jobSchema: Schema = new Schema(
         applyLink: { type: String, default: '' },
         instruction: {type: String, default: ''},
         hrEmail: { type: String, default: 'hr@company.com' },
-        notes: {type: String, default: ''}
+        notes: {type: String, default: ''},
+        // Status field indicating the job application state
+        status: { 
+            type: String, 
+            enum: ['Not Applied', 'Applied', 'Interview Scheduled', 'Rejected', 'Accepted'],
+            default: 'Not Applied'
+        },
+        interviewDate: { type: Date, default: null },  // Store interview date if applicable
     },
     { timestamps: true }
 );
 
+
+
+
+// Adding indexes to improve query performance
+// for future work
+
+jobSchema.index({ status: 1 });  
+//helps speed up queries like "Find jobs with status = 'Not Applied'
+
+
+jobSchema.index({ applicationDeadline: 1 });  
+// helps with queries like "Find expired jobs" or "Find jobs with upcoming deadlines"
+
+jobSchema.index({ createdAt: -1 });  
+// helps with queries like "Find the latest job postings"
+
+// Create Job model
 const JobModel = mongoose.model<Document>('Job', jobSchema);
 
 export default JobModel;
