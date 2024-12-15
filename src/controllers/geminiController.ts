@@ -17,10 +17,6 @@ export const processGeminiRequest = async (req: AuthenticatedRequest, res: Respo
 
         const result = await analyzeData(prompt);
 
-
-        // Assuming you have a user object attached to the request from the authentication middleware
-        //const user = (req as any).user;
-
         // Use user information added by the middleware
         const user = req.user;
 

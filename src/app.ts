@@ -2,7 +2,7 @@ import express, { Express, NextFunction, Request, Response } from "express";
 import dotenv from "dotenv";
 import { errorResponse } from "./utils/errorResponse";
 import authRouter from "./routes/authRoutes";
-import geminiRouter from "./routes/geminiRoutes";
+import jobRouter from "./routes/jobRoutes";
 const cors = require('cors');
 
 dotenv.config();
@@ -19,7 +19,8 @@ app.use(express.json());
 app.use('/auth', authRouter);
 
 
-app.use('/user', geminiRouter);
+app.use('/user', jobRouter);
+
 
 
 
