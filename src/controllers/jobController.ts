@@ -38,9 +38,8 @@ export const getUserJobs = async (req: AuthenticatedRequest, res: Response): Pro
     try {
         // Extract userId from the request parameters
         const userid  = req.user?.id;
-        console.log("getting user jobs", userid);
         
-
+        console.log("getting user jobs", userid);
         // Check if userId is valid
         if (!userid) {
             return sendResponse(res, 400, false, "User ID is required");
