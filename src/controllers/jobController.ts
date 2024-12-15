@@ -13,7 +13,7 @@ export const createJobForUser = async (userId: string, jobData: any): Promise<vo
         const newJob = new JobModel(jobData);
         await newJob.save();
 
-        // Add the new job to the user's jobs array
+        // Add the new job to the users jobs array
         await UserModel.findByIdAndUpdate(userId, {
             $push: { jobs: newJob._id }, // Push the job ID to the user's jobs array
         });
@@ -38,7 +38,7 @@ export const getUserJobs = async (req: AuthenticatedRequest, res: Response): Pro
     try {
         // Extract userId from the request parameters
         const userid  = req.user?.id;
-        
+
         console.log("getting user jobs", userid);
         // Check if userId is valid
         if (!userid) {
@@ -54,12 +54,11 @@ export const getUserJobs = async (req: AuthenticatedRequest, res: Response): Pro
         }
 
         // Return the populated jobs
-        //res.status(200).json({ jobs: user.jobs });
+        
         return sendResponse(res, 200, true,"Users Job fetched successfully", user.jobs);
 
     } catch (error) {
         console.error('Error fetching user jobs:', error);
-        //res.status(500).json({ message: 'Server error', error });
         return sendResponse(res, 500, false,"Server error while fetching jobs");
     }
 };
