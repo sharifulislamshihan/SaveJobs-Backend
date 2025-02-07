@@ -131,38 +131,38 @@ export const verifyCode = async (req: Request, res: Response) => {
 
 // Resend Verification code
 export const resendVerificationCodeEmail = async (req: Request, res: Response) => {
-    const { name, email } = req.body;
+    const { email } = req.body;
     try {
         // Find the user by email
         const user = await UserModel.findOne({ email });
+        
         if (!user) {
-            return sendResponse(res, 404, false, "User not found")
+            return sendResponse(res, 404, false, "User not found");
         }
 
         // Check if the user is already verified
         if (user.isVerified) {
-            return sendResponse(res, 400, false, 'User is already verified')
+            return sendResponse(res, 400, false, 'User is already verified');
         }
 
         // Generate a new verification code and update expiration time
         const verificationCode = generateVerificationCode();
         user.verificationCode = verificationCode;
-        user.verificationCodeExpiration = new Date(Date.now() + 10 * 60 * 1000); // Expire in 10 minutes
+        user.verificationCodeExpiration = new Date(Date.now() + 10 * 60 * 1000);
 
-        // saving the data
+        // Save the updated user data
         await user.save();
 
-        // sending verification email again
-        sendVerificationCodeEmail(name, email, verificationCode);
-
-
+        // Send verification email using user's name from database
+        await sendVerificationCodeEmail(user.name, email, verificationCode);
+        
+        return sendResponse(res, 200, true, "Verification code resent successfully");
 
     } catch (error) {
-        console.error("Error in Resend verification code", error);
-        return sendResponse(res, 500, false, 'Server Error.. Send the Email Again')
+        console.error("Resend verification error:", error);
+        return sendResponse(res, 500, false, "Failed to resend verification code");
     }
 }
-
 
 
 // Login
