@@ -11,7 +11,11 @@ const app: Express = express();
 
 
 // middleware
-app.use(cors());
+app.use(cors({
+    origin: 'http://localhost:3000', // frontend URL
+    credentials: true // using cookies/auth
+}));
+
 app.use(express.json());
 
 

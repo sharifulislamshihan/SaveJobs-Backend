@@ -39,16 +39,7 @@ const userSchema: Schema<IUser> = new Schema(
         password: {
             type: String,
             required: [true, 'Password is required'],
-            minlength: [6, 'Password must be at least 6 characters long'],
-            validate: {
-                validator: function (value: string) {
-                    const mediumPasswordRegex =
-                        /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*?&]{6,}$/;
-                    return mediumPasswordRegex.test(value);
-                },
-                message:
-                    'Password must be at least 6 characters long and include at least one letter and one number',
-            },
+            minlength: 6, // Keep minimum length rule
         },
         isVerified: {
             type: Boolean,
@@ -64,7 +55,7 @@ const userSchema: Schema<IUser> = new Schema(
         },
         image: {
             type: String,
-            default: null, // No validation
+            default: "https://ibb.co.com/LphZgmF", // No validation
         },
         authMethod: {
             type: String,

@@ -9,51 +9,79 @@ import { sendVerificationCodeEmail } from '../utils/sendVerificationCode';
 
 // register and send verification code
 export const registerUser = async (req: Request, res: Response) => {
-    const { name, email, password, image } = req.body;
     try {
+        const { name, email, password, image } = req.body;
 
-        // Check if user already exists
-        const existingUser = await UserModel.findOne({ email });
-        if (existingUser) {
-            // sending response
-            return sendResponse(res, 400, false, "Email already in use")
+
+        // Getting error while keeping this regex in the userModel because of hashing password
+        // Validate password before hashing
+        const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d).{6,}$/;
+        if (!passwordRegex.test(password)) {
+            return sendResponse(
+                res,
+                400,
+                false,
+                "Password must be at least 6 characters long and include at least one letter and one number"
+            );
         }
 
-
-        // Hash Password
-        const hashedPassword = await bcrypt.hash(password, 10); //10 salt
+        const existingUser = await UserModel.findOne({ email });
+        if (existingUser) {
+            return sendResponse(res, 400, false, "Email already in use");
+        }
 
         const verificationCode = generateVerificationCode();
-        const verificationCodeExpiration = new Date(Date.now() + 10 * 60 * 1000); // Expires in 10 minutes
+        const verificationCodeExpiration = new Date(Date.now() + 10 * 60 * 1000);
 
-        // Create new user in DB
+        // Hash Password AFTER validation
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Create new user
         const newUser = new UserModel({
             name,
             email,
-            password: hashedPassword,
+            password: hashedPassword, // Store hashed password
             image,
             verificationCode,
             verificationCodeExpiration,
             isVerified: false,
             authMethod: "email-password",
         });
-        await newUser.save();
 
-        // sending verification code
-        sendVerificationCodeEmail(name, email, verificationCode);
+        const savedUser = await newUser.save();
+
+        if (!savedUser) {
+            return sendResponse(res, 500, false, "Failed to save user");
+        }
+
+        // Send verification code
+        try {
+            await sendVerificationCodeEmail(name, email, verificationCode);
+            return sendResponse(res, 201, true, "User created successfully");
+        } catch (emailError) {
+            console.error("Email sending error:", emailError);
+            return sendResponse(res, 201, true, "User created but email verification failed");
+        }
 
     } catch (error) {
-
+        console.error("Register User Error:", {
+            message: (error as Error).message,
+            stack: (error as Error).stack
+        });
+        return sendResponse(res, 500, false, `Server Error: ${(error as Error).message}`);
     }
-}
+};
+
 
 
 // Verify code
 export const verifyCode = async (req: Request, res: Response) => {
 
-    const { email, verificationCode } = req.body;
-
     try {
+
+        const { email, verificationCode } = req.body;
+
+        console.log(email, verificationCode);
 
         // Check if required fields are provided
         if (!email || !verificationCode) {
@@ -62,7 +90,13 @@ export const verifyCode = async (req: Request, res: Response) => {
 
 
         // Find the user in the database
-        const user: IUser | null = await UserModel.findOne({ email });
+        const user = await UserModel.findOne({ 
+            email: email
+        });
+
+        console.log("user status", user);
+
+        console.log("1");
 
         // Handle user not found
         if (!user) {

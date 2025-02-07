@@ -19,18 +19,18 @@ const jobSchema: Schema = new Schema(
         keyResponsibilities: { type: [String], default: [] },
         perksAndBenefits: { type: [String], default: [] },
         applicationLink: { type: String, default: '' },
-        sourceLink: { type: String, default: '' },
-        applyLink: { type: String, default: '' },
-        instruction: {type: String, default: ''},
-        hrEmail: { type: String, default: 'hr@company.com' },
-        notes: {type: String, default: ''},
         // Status field indicating the job application state
         status: { 
             type: String, 
             enum: ['Not Applied', 'Applied', 'Interview Scheduled', 'Rejected', 'Accepted'],
             default: 'Not Applied'
         },
+        sourceLink: { type: String, default: '' },
+        applyLink: { type: String, default: '' },
+        instruction: {type: String, default: ''},
+        hrEmail: { type: String, default: 'hr@company.com' },
         interviewDate: { type: Date, default: null },  // Store interview date if applicable
+        notes: {type: String, default: ''},
     },
     { timestamps: true }
 );
