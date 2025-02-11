@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import { errorResponse } from "./utils/errorResponse";
 import authRouter from "./routes/authRoutes";
 import jobRouter from "./routes/jobRoutes";
+import { userRouter } from "./routes/userRoutes";
 const cors = require('cors');
 
 dotenv.config();
@@ -23,7 +24,9 @@ app.use(express.json());
 app.use('/auth', authRouter);
 
 
-app.use('/user', jobRouter);
+app.use('/job', jobRouter);
+
+app.use('/user', userRouter);
 
 
 

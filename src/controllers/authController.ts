@@ -171,6 +171,12 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     const { email, password } = req.body;
 
     try {
+        console.log("Login request received");
+        console.log("Email",email);
+        console.log("Password",password);
+        
+        
+        
         // Check if user exists
         const user = await UserModel.findOne({ email });
         if (!user) {
@@ -196,8 +202,12 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
             sameSite: 'strict',
+            secure: process.env.NODE_ENV === 'development',
             maxAge: 15 * 24 * 60 * 60 * 1000, // 15 days
         });
+
+        // Log user in checking
+        console.log(`User ${user.email} logged in successfully`);
 
         // Send response
         res.status(200).json({
