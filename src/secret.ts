@@ -19,6 +19,8 @@ const smtpPort: string | undefined = process.env.SMTP_PORT;
 
 const geminiApi: string | undefined = process.env.GEMINI_API
 
+const betterAuth: string | undefined = process.env.BETTER_AUTH_SECRET
+
 
 
 export{
@@ -28,5 +30,6 @@ export{
     smtpHost,
     smtpPort,
     refreshSecret,
-    geminiApi
+    geminiApi,
+    betterAuth,
 }

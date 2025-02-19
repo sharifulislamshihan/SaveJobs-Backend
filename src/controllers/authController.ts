@@ -90,7 +90,7 @@ export const verifyCode = async (req: Request, res: Response) => {
 
 
         // Find the user in the database
-        const user = await UserModel.findOne({ 
+        const user = await UserModel.findOne({
             email: email
         });
 
@@ -135,7 +135,7 @@ export const resendVerificationCodeEmail = async (req: Request, res: Response) =
     try {
         // Find the user by email
         const user = await UserModel.findOne({ email });
-        
+
         if (!user) {
             return sendResponse(res, 404, false, "User not found");
         }
@@ -155,7 +155,7 @@ export const resendVerificationCodeEmail = async (req: Request, res: Response) =
 
         // Send verification email using user's name from database
         await sendVerificationCodeEmail(user.name, email, verificationCode);
-        
+
         return sendResponse(res, 200, true, "Verification code resent successfully");
 
     } catch (error) {
@@ -172,11 +172,11 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
     try {
         console.log("Login request received");
-        console.log("Email",email);
-        console.log("Password",password);
-        
-        
-        
+        console.log("Email", email);
+        console.log("Password", password);
+
+
+
         // Check if user exists
         const user = await UserModel.findOne({ email });
         if (!user) {
@@ -241,5 +241,41 @@ export const logout = async (req: Request, res: Response) => {
         res.status(200).json({ message: 'Logout successful.' });
     } catch (error) {
         res.status(500).json({ message: 'Internal server error.', error });
+    }
+};
+
+
+
+// to check user loggedin
+export const getMe = async (req: Request, res: Response) => {
+    try {
+        // Extract user info from request (added by the authenticate middleware)
+        const userId = (req as any).user?.id;
+
+        console.log("this is the user id", userId);
+        
+        // Check if user ID is present
+        if (!userId) {
+            return sendResponse(res, 401, false, 'Unauthorized: User not authenticated');
+        }
+
+        // Fetch user details from DB
+        const user = await UserModel.findById(userId).select('-password'); // Exclude password from response
+
+        if (!user) {
+            return sendResponse(res, 404, false, 'User not found');
+        }
+
+        // Send user data
+        return sendResponse(res, 200, true, 'User retrieved successfully', {
+            id: user._id,
+            name: user.name,
+            email: user.email,
+            image: user.image,
+        });
+
+    } catch (error) {
+        console.error(error);
+        return sendResponse(res, 500, false, 'Internal server error while fetching user data');
     }
 };

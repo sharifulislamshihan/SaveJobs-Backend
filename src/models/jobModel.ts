@@ -28,7 +28,7 @@ const jobSchema: Schema = new Schema(
         sourceLink: { type: String, default: '' },
         applyLink: { type: String, default: '' },
         instruction: {type: String, default: ''},
-        hrEmail: { type: String, default: 'hr@company.com' },
+        hrEmail: { type: String, default: '' },
         interviewDate: { type: Date, default: null },  // Store interview date if applicable
         notes: {type: String, default: ''},
     },

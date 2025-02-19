@@ -1,5 +1,6 @@
 import express from 'express';
-import { login, logout, registerUser, resendVerificationCodeEmail, verifyCode } from '../controllers/authController';
+import { getMe, login, logout, registerUser, resendVerificationCodeEmail, verifyCode } from '../controllers/authController';
+import { authenticate } from '../middleware/authMiddleware';
 
 
 const authRouter = express.Router();
@@ -16,5 +17,11 @@ authRouter.post('/resend-code', resendVerificationCodeEmail);
 // Login
 authRouter.post('/login', login);
 authRouter.post('/logout', logout);
+
+
+// Verify authentication (Protected Route)
+authRouter.get('/me', authenticate, getMe);
+
+
 
 export default authRouter;

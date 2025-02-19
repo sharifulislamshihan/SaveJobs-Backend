@@ -8,6 +8,8 @@ import { AuthenticatedRequest } from '../customType/types';
 export const authenticate = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     const token = req.headers.authorization?.split(' ')[1]; // Bearer <token>
 
+    console.log("this is the bearer token", token)
+
     if (!token) {
         return sendResponse(res, 401, false, 'Unauthorized: No token provided.');
     }
@@ -17,7 +19,7 @@ export const authenticate = (req: AuthenticatedRequest, res: Response, next: Nex
         console.log("this is from authRequest",decoded);
         //(req as any).user = decoded; // Attach user info to request
         req.user = decoded as { id: string; name: string; email: string };
-        
+        console.log("checking it in the authenticate middleware",req.user);
         next();
     } catch (error) {
         return sendResponse(res, 401, false, 'Unauthorized: Invalid token.')

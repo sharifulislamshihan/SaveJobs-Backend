@@ -4,7 +4,9 @@ import { errorResponse } from "./utils/errorResponse";
 import authRouter from "./routes/authRoutes";
 import jobRouter from "./routes/jobRoutes";
 import { userRouter } from "./routes/userRoutes";
-const cors = require('cors');
+import { toNodeHandler, fromNodeHeaders } from "better-auth/node";
+import { auth } from "./lib/auth";
+import cors from 'cors';
 
 dotenv.config();
 
@@ -16,6 +18,17 @@ app.use(cors({
     origin: 'http://localhost:3000', // frontend URL
     credentials: true // using cookies/auth
 }));
+
+app.all("/api/auth/*", toNodeHandler(auth));
+
+// app.get("/api/me", async (req: Request, res: Response): Promise<void>{
+//     const session = await auth.api.getSession({
+//         headers: fromNodeHeaders(req.headers),
+//     });
+
+//     res.json(session);
+// });
+
 
 app.use(express.json());
 
