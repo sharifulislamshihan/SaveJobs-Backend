@@ -4,24 +4,35 @@ import { jwtSecret } from '../secret';
 import { sendResponse } from '../utils/sendResponse';
 import { AuthenticatedRequest } from '../customType/types';
 
-
-export const authenticate = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-    const token = req.headers.authorization?.split(' ')[1]; // Bearer <token>
-
-    console.log("this is the bearer token", token)
-
-    if (!token) {
-        return sendResponse(res, 401, false, 'Unauthorized: No token provided.');
-    }
-
+export const authenticate = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
-        const decoded = verifyToken(token, jwtSecret as string);
-        console.log("this is from authRequest",decoded);
-        //(req as any).user = decoded; // Attach user info to request
-        req.user = decoded as { id: string; name: string; email: string };
-        console.log("checking it in the authenticate middleware",req.user);
-        next();
+        // Get token from Authorization header
+        const authHeader = req.headers.authorization;
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            return sendResponse(res, 401, false, 'Unauthorized: No token provided');
+        }
+
+        // Extract token
+        const token = authHeader.split(' ')[1];
+
+        try {
+            // Verify token
+            const decoded = verifyToken(token, jwtSecret as string);
+            
+            // Attach decoded user to request
+            req.user = decoded as { 
+                id: string; 
+                email: string; 
+                name: string;
+            };
+            console.log("user form auth middleware", req.user);
+            
+            next();
+        } catch (error) {
+            return sendResponse(res, 401, false, 'Invalid or expired token');
+        }
     } catch (error) {
-        return sendResponse(res, 401, false, 'Unauthorized: Invalid token.')
+        console.error('Auth Middleware Error:', error);
+        return sendResponse(res, 500, false, 'Authentication error');
     }
-}
+};

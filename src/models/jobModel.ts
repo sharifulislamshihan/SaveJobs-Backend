@@ -11,7 +11,6 @@ const jobSchema: Schema = new Schema(
         expectedSalary: { type: String, default: 'Not Specified' },
         applicationDeadline: {
             type: Date,
-            required: true,
             default: null // Set default as null if not provided
         },
         description: { type: String, required: true, default: 'Job Description not provided.' },

@@ -5,11 +5,15 @@ import { createJobForUser } from "./jobController";
 import { AuthenticatedRequest } from "../customType/types";
 
 export const processGeminiRequest = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const { prompt } = req.body;
+    const { prompt, id } = req.body;
+    console.log("Prompt in the process :", prompt);
+    console.log("Id in the process :",id);
 
-    if (!prompt) {
+
+
+    if (!prompt || !id) {
         //res.status(400).json({ error: "Prompt is required." });
-        return sendResponse(res, 400, false, "Prompt is required.")
+        return sendResponse(res, 400, false, "Prompt and id is required.")
     }
 
     try {
@@ -18,16 +22,16 @@ export const processGeminiRequest = async (req: AuthenticatedRequest, res: Respo
         const result = await analyzeData(prompt);
 
         // Use user information added by the middleware
-        const user = req.user;
+        //const user = req.user;
 
-        if (!user) {
-            return sendResponse(res, 401, false, "User information is missing.");
+        if (!id) {
+            return sendResponse(res, 401, false, "User id is missing.");
         }
 
-        console.log("User info in processGeminiRequest:", user); // Debug log
+        console.log("User info in processGeminiRequest id:", id); // Debug log
 
         // Save the job to the user's document
-        await createJobForUser(user.id, result); // Pass user ID and the generated job data
+        await createJobForUser(id, result); // Pass user ID and the generated job data
         //res.status(200).json({ result });
         return sendResponse(res, 200, true, result)
     } catch (error: any) {

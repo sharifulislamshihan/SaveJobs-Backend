@@ -10,6 +10,10 @@ export const createJobForUser = async (userId: string, jobData: any): Promise<vo
     try {
         // Create a new job entry in the Job collection
         // jobData is the result from Gemini
+        console.log("this is the job data", jobData);
+        console.log("this is the user id", userId);
+        
+        
         const newJob = new JobModel(jobData);
         await newJob.save();
 
