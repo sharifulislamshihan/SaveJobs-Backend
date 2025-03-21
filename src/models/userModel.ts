@@ -39,6 +39,10 @@ const userSchema: Schema<IUser> = new Schema(
         password: {
             type: String,
             required: [true, 'Password is required'],
+            match: [
+                /^(?=.*[A-Za-z])(?=.*\d).{6,}$/,
+                'Password must be at least 6 characters long and include at least one letter and one number',
+            ],
             minlength: 6, // Keep minimum length rule
         },
         isVerified: {

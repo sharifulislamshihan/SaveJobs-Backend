@@ -132,9 +132,16 @@ export const verifyCode = async (req: Request, res: Response) => {
 // Resend Verification code
 export const resendVerificationCodeEmail = async (req: Request, res: Response) => {
     const { email } = req.body;
+    console.log("Email for resend verification code", email);
     try {
         // Find the user by email
-        const user = await UserModel.findOne({ email });
+        const user = await UserModel.findOne({ 
+            email: email 
+        });
+
+        // Check if user exists
+        console.log("User", user);
+        
 
         if (!user) {
             return sendResponse(res, 404, false, "User not found");
@@ -147,6 +154,8 @@ export const resendVerificationCodeEmail = async (req: Request, res: Response) =
 
         // Generate a new verification code and update expiration time
         const verificationCode = generateVerificationCode();
+        console.log("Verification code in resend", verificationCode);
+        
         user.verificationCode = verificationCode;
         user.verificationCodeExpiration = new Date(Date.now() + 10 * 60 * 1000);
 
@@ -245,6 +254,100 @@ export const logout = async (req: Request, res: Response) => {
 };
 
 
+// forget password to check user email exists or not
+export const forgetPassword = async (req: Request, res: Response) => {
+    try {
+        const { email } = req.body;
+        console.log("Forget password request received");
+        
+
+        // Check if user exists
+        const user = await UserModel.findOne({
+            email
+        });
+        if (!user) {
+            return sendResponse(res, 404, false, 'User not found')
+        }
+
+        // Generate a new verification code and update expiration time
+        const verificationCode = generateVerificationCode();
+        user.verificationCode = verificationCode;
+        user.verificationCodeExpiration = new Date(Date.now() + 10 * 60 * 1000);
+
+        // Save the updated user data
+        await user.save();
+
+        const name = email.split('@')[0];
+
+        // Send verification email using user's name from database
+        await sendVerificationCodeEmail(name, email, verificationCode);
+
+        return sendResponse(res, 200, true, "Verification code resent successfully");
+    }
+    catch (error) {
+        console.error(error);
+        return sendResponse(res, 500, false, 'Internal server error while forget password')
+    }
+}
+
+
+// reset password
+export const resetPassword = async (req: Request, res: Response) => {
+    try {
+        const { email, verificationCode, newPassword } = req.body;
+
+        // Validate new password
+        const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d).{6,}$/;
+        if (!passwordRegex.test(newPassword)) {
+            return sendResponse(
+                res,
+                400,
+                false,
+                "Password must be at least 6 characters long and include at least one letter and one number"
+            );
+        }
+
+        console.log("Reset password request received");
+        console.log("Email", email);
+        console.log("Verification Code", verificationCode);
+        console.log("New Password", newPassword);
+        
+        
+        // Find user and verify code
+        const user = await UserModel.findOne({ email });
+
+        if (!user) {
+            return sendResponse(res, 404, false, "User not found");
+        }
+
+        // Verify the verification code
+        if (!user.verificationCode || user.verificationCode !== verificationCode) {
+            return sendResponse(res, 400, false, "Invalid verification code");
+        }
+
+        // Check if code has expired
+        if (!user.verificationCodeExpiration || user.verificationCodeExpiration < new Date()) {
+            return sendResponse(res, 400, false, "Verification code has expired");
+        }
+
+        // Hash new password
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        // Update password and clear verification data
+        user.password = hashedPassword;
+        user.verificationCode = null;
+        user.verificationCodeExpiration = null;
+        await user.save();
+
+        return sendResponse(res, 200, true, "Password reset successfully");
+
+    } catch (error) {
+        console.error("Reset Password Error:", error);
+        return sendResponse(res, 500, false, "Internal server error while resetting password");
+    }
+};
+
+
 
 // to check user loggedin
 export const getMe = async (req: Request, res: Response) => {
@@ -253,7 +356,7 @@ export const getMe = async (req: Request, res: Response) => {
         const userId = (req as any).user?.id;
 
         console.log("this is the user id", userId);
-        
+
         // Check if user ID is present
         if (!userId) {
             return sendResponse(res, 401, false, 'Unauthorized: User not authenticated');

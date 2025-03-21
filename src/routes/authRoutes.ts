@@ -1,5 +1,5 @@
 import express from 'express';
-import { getMe, login, logout, registerUser, resendVerificationCodeEmail, verifyCode } from '../controllers/authController';
+import { forgetPassword, getMe, login, logout, registerUser, resendVerificationCodeEmail, resetPassword, verifyCode } from '../controllers/authController';
 import { authenticate } from '../middleware/authMiddleware';
 
 
@@ -18,6 +18,10 @@ authRouter.post('/resend-code', resendVerificationCodeEmail);
 authRouter.post('/login', login);
 authRouter.post('/logout', logout);
 
+// forget password
+authRouter.post('/forgetPassword', forgetPassword);
+// reset password
+authRouter.post('/resetPassword', resetPassword);
 
 // Verify authentication (Protected Route)
 authRouter.get('/me', authenticate, getMe);

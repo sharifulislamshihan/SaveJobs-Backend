@@ -12,8 +12,8 @@ export const createJobForUser = async (userId: string, jobData: any): Promise<vo
         // jobData is the result from Gemini
         console.log("this is the job data", jobData);
         console.log("this is the user id", userId);
-        
-        
+
+
         const newJob = new JobModel(jobData);
         await newJob.save();
 
@@ -41,7 +41,7 @@ export const createJobForUser = async (userId: string, jobData: any): Promise<vo
 export const getUserJobs = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
         // Extract userId from the request parameters
-        const userid  = req.user?.id;
+        const userid = req.user?.id;
 
         console.log("getting user jobs", userid);
         // Check if userId is valid
@@ -50,7 +50,11 @@ export const getUserJobs = async (req: AuthenticatedRequest, res: Response): Pro
         }
 
         // Find the user and populate their jobs
-        const user: IUser | null = await UserModel.findById(userid).populate('jobs').exec();
+        const user = await UserModel.findById(userid)
+            .populate('jobs')
+            .exec();
+
+        console.log("user in the backend fot get users job", user);
 
         // Handle case where user is not found
         if (!user) {
@@ -58,11 +62,11 @@ export const getUserJobs = async (req: AuthenticatedRequest, res: Response): Pro
         }
 
         // Return the populated jobs
-        
-        return sendResponse(res, 200, true,"Users Job fetched successfully", user.jobs);
+
+        return sendResponse(res, 200, true, "Users Job fetched successfully", user.jobs);
 
     } catch (error) {
         console.error('Error fetching user jobs:', error);
-        return sendResponse(res, 500, false,"Server error while fetching jobs");
+        return sendResponse(res, 500, false, "Server error while fetching jobs");
     }
 };

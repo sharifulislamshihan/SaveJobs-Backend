@@ -16,7 +16,9 @@ const app: Express = express();
 // middleware
 app.use(cors({
     origin: 'http://localhost:3000', // frontend URL
-    credentials: true // using cookies/auth
+    credentials: true, // using cookies/auth
+    // methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+    // allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 app.all("/api/auth/*", toNodeHandler(auth));
