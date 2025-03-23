@@ -3,6 +3,7 @@ import { AuthenticatedRequest } from "../customType/types";
 import JobModel from "../models/jobModel";
 import UserModel, { IUser } from "../models/userModel";
 import { sendResponse } from "../utils/sendResponse";
+import mongoose from "mongoose";
 
 
 
@@ -68,5 +69,105 @@ export const getUserJobs = async (req: AuthenticatedRequest, res: Response): Pro
     } catch (error) {
         console.error('Error fetching user jobs:', error);
         return sendResponse(res, 500, false, "Server error while fetching jobs");
+    }
+};
+
+
+// Get Single Job
+export const getSingleJob = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+        const jobId = req.params.id;
+        console.log("job id in the get single job", jobId);
+
+        const userId = req.user?.id;
+
+        if (!jobId || !userId) {
+            return sendResponse(res, 400, false, "Job ID and User ID are required");
+        }
+
+        const job = await JobModel.findById(jobId);
+        if (!job) {
+            return sendResponse(res, 404, false, "Job not found");
+        }
+
+        // Ensure the job belongs to the user
+        const user = await UserModel.findById(userId);
+        if (!user || !user.jobs.includes(new mongoose.Types.ObjectId(jobId))) {
+            return sendResponse(res, 403, false, "Unauthorized access to job");
+        }
+
+        return sendResponse(res, 200, true, "Job fetched successfully", job);
+    } catch (error) {
+        console.error("Error fetching job:", error);
+        return sendResponse(res, 500, false, "Server error while fetching job");
+    }
+};
+
+
+
+// Delete Single Job
+export const deleteJob = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+        const jobId = req.params.id;
+        const userId = req.user?.id;
+
+        if (!jobId || !userId) {
+            return sendResponse(res, 400, false, "Job ID and User ID are required");
+        }
+
+        const job = await JobModel.findById(jobId);
+        if (!job) {
+            return sendResponse(res, 404, false, "Job not found");
+        }
+
+        // Ensure the job belongs to the user
+        const user = await UserModel.findById(userId);
+        if (!user || !user.jobs.includes(new mongoose.Types.ObjectId(jobId))) {
+            return sendResponse(res, 403, false, "Unauthorized access to job");
+        }
+
+        // Delete the job
+        await JobModel.findByIdAndDelete(jobId);
+
+        // Remove the job from user's jobs array
+        await UserModel.findByIdAndUpdate(userId, {
+            $pull: { jobs: jobId },
+        });
+
+        return sendResponse(res, 200, true, "Job deleted successfully");
+    } catch (error) {
+        console.error("Error deleting job:", error);
+        return sendResponse(res, 500, false, "Server error while deleting job");
+    }
+};
+
+
+// update a job
+export const updateJob = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+        const jobId = req.params.id;
+        const userId = req.user?.id;
+        const updatedData = req.body;
+
+        if (!jobId || !userId) {
+            return sendResponse(res, 400, false, "Job ID and User ID are required");
+        }
+
+        const job = await JobModel.findById(jobId);
+        if (!job) {
+            return sendResponse(res, 404, false, "Job not found");
+        }
+
+        // Ensure the job belongs to the user
+        const user = await UserModel.findById(userId);
+        if (!user || !user.jobs.includes(new mongoose.Types.ObjectId(jobId))) {
+            return sendResponse(res, 403, false, "Unauthorized access to job");
+        }
+
+        const updatedJob = await JobModel.findByIdAndUpdate(jobId, updatedData, { new: true });
+        return sendResponse(res, 200, true, "Job updated successfully", updatedJob);
+    } catch (error) {
+        console.error("Error updating job:", error);
+        return sendResponse(res, 500, false, "Server error while updating job");
     }
 };
