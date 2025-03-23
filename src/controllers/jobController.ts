@@ -171,3 +171,70 @@ export const updateJob = async (req: AuthenticatedRequest, res: Response): Promi
         return sendResponse(res, 500, false, "Server error while updating job");
     }
 };
+
+
+// delete Multiple
+export const deleteMultipleJobs = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+        const { jobIds } = req.body;
+        const userId = req.user?.id;
+
+        if (!jobIds || !Array.isArray(jobIds) || jobIds.length === 0 || !userId) {
+            return sendResponse(res, 400, false, "Job IDs and User ID are required");
+        }
+
+        const user = await UserModel.findById(userId);
+        if (!user) {
+            return sendResponse(res, 404, false, "User not found");
+        }
+
+        // Verify all jobs belong to the user
+        const validJobs = jobIds.filter((id: string) => user.jobs.includes(new mongoose.Types.ObjectId(id)));
+        if (validJobs.length !== jobIds.length) {
+            return sendResponse(res, 403, false, "Unauthorized access to some jobs");
+        }
+
+        // Delete jobs
+        await JobModel.deleteMany({ _id: { $in: jobIds } });
+
+        // Remove from user's jobs array
+        await UserModel.findByIdAndUpdate(userId, {
+            $pull: { jobs: { $in: jobIds } },
+        });
+
+        return sendResponse(res, 200, true, "Jobs deleted successfully");
+    } catch (error) {
+        console.error("Error deleting multiple jobs:", error);
+        return sendResponse(res, 500, false, "Server error while deleting jobs");
+    }
+};
+
+
+
+// delete All Jobs
+export const deleteAllJobs = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+        const userId = req.user?.id;
+
+        if (!userId) {
+            return sendResponse(res, 400, false, "User ID is required");
+        }
+
+        const user = await UserModel.findById(userId);
+        if (!user) {
+            return sendResponse(res, 404, false, "User not found");
+        }
+
+        // Delete all jobs associated with the user
+        await JobModel.deleteMany({ _id: { $in: user.jobs } });
+
+        // Clear user's jobs array
+        user.jobs = [];
+        await user.save();
+
+        return sendResponse(res, 200, true, "All jobs deleted successfully");
+    } catch (error) {
+        console.error("Error deleting all jobs:", error);
+        return sendResponse(res, 500, false, "Server error while deleting all jobs");
+    }
+};
