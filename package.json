@@ -7,8 +7,15 @@
     "start": "nodemon src/index.ts",
     "build": "rimraf dist && tsc",
     "dev": "nodemon src/index.ts",
-    "serve": "node dist/index.js"
+    "serve": "node dist/index.js",
+    "ts.check": "tsc --project tsconfig.json",
+    "add-build": "git add dist"
   },
+  "pre-commit": [
+    "ts.check",
+    "build",
+    "add-build"
+  ],
   "keywords": [],
   "author": "",
   "license": "ISC",
