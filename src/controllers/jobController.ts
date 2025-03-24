@@ -238,3 +238,163 @@ export const deleteAllJobs = async (req: AuthenticatedRequest, res: Response): P
         return sendResponse(res, 500, false, "Server error while deleting all jobs");
     }
 };
+
+
+// Get Job Statistics for Dashboard
+export const getJobStats = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+        const userId = req.user?.id;
+
+        if (!userId) {
+            return sendResponse(res, 400, false, "User ID is required");
+        }
+
+        const user = await UserModel.findById(userId).populate("jobs");
+        if (!user) {
+            return sendResponse(res, 404, false, "User not found");
+        }
+
+        const jobs = user.jobs as any[];
+        const stats = {
+            totalJobs: jobs.length,
+            applied: jobs.filter((job) => job.status === "Applied").length,
+            interviews: jobs.filter((job) => job.status === "Interview Scheduled").length,
+            accepted: jobs.filter((job) => job.status === "Accepted").length,
+            rejected: jobs.filter((job) => job.status === "Rejected").length,
+            pending: jobs.filter((job) => job.status === "Not Applied").length,
+        };
+
+        return sendResponse(res, 200, true, "Stats fetched successfully", stats);
+    } catch (error) {
+        console.error("Error fetching job stats:", error);
+        return sendResponse(res, 500, false, "Server error while fetching stats");
+    }
+};
+
+// Get Upcoming Deadlines and Interviews
+export const getUpcomingJobs = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+        const userId = req.user?.id;
+
+        if (!userId) {
+            return sendResponse(res, 400, false, "User ID is required");
+        }
+
+        const user = await UserModel.findById(userId).populate("jobs");
+        if (!user) {
+            return sendResponse(res, 404, false, "User not found");
+        }
+
+        const jobs = user.jobs as any[];
+        const now = new Date();
+        const sevenDaysFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+        const threeDaysFromNow = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
+
+        const upcomingDeadlines = jobs
+            .filter((job) => job.applicationDeadline && new Date(job.applicationDeadline) <= sevenDaysFromNow && new Date(job.applicationDeadline) >= now)
+            .map((job) => ({
+                company: job.company,
+                position: job.position,
+                deadline: job.applicationDeadline,
+            }));
+
+        const upcomingInterviews = jobs
+            .filter((job) => job.interviewDate && new Date(job.interviewDate) <= threeDaysFromNow && new Date(job.interviewDate) >= now)
+            .map((job) => ({
+                company: job.company,
+                position: job.position,
+                interviewDate: job.interviewDate,
+            }));
+
+        return sendResponse(res, 200, true, "Upcoming jobs fetched successfully", {
+            deadlines: upcomingDeadlines,
+            interviews: upcomingInterviews,
+        });
+    } catch (error) {
+        console.error("Error fetching upcoming jobs:", error);
+        return sendResponse(res, 500, false, "Server error while fetching upcoming jobs");
+    }
+};
+
+
+// Get Monthly Application Trend
+export const getMonthlyTrend = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+        const userId = req.user?.id;
+
+        if (!userId) {
+            return sendResponse(res, 400, false, "User ID is required");
+        }
+
+        const user = await UserModel.findById(userId).populate("jobs");
+        if (!user) {
+            return sendResponse(res, 404, false, "User not found");
+        }
+
+        const jobs = user.jobs as any[];
+        const monthlyData: { [key: string]: number } = {};
+
+        // Initialize the last 6 months
+        const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        const now = new Date();
+        for (let i = 5; i >= 0; i--) {
+            const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+            const monthKey = months[date.getMonth()];
+            monthlyData[monthKey] = 0;
+        }
+
+        // Count applications per month
+        jobs.forEach((job) => {
+            const createdAt = new Date(job.createdAt);
+            const monthKey = months[createdAt.getMonth()];
+            if (monthlyData[monthKey] !== undefined) {
+                monthlyData[monthKey]++;
+            }
+        });
+
+        const trendData = Object.keys(monthlyData).map((month) => ({
+            month,
+            applications: monthlyData[month],
+        }));
+
+        return sendResponse(res, 200, true, "Monthly trend fetched successfully", trendData);
+    } catch (error) {
+        console.error("Error fetching monthly trend:", error);
+        return sendResponse(res, 500, false, "Server error while fetching monthly trend");
+    }
+};
+
+
+// Get Jobs by Source
+export const getJobsBySource = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+        const userId = req.user?.id;
+
+        if (!userId) {
+            return sendResponse(res, 400, false, "User ID is required");
+        }
+
+        const user = await UserModel.findById(userId).populate("jobs");
+        if (!user) {
+            return sendResponse(res, 404, false, "User not found");
+        }
+
+        const jobs = user.jobs as any[];
+        const sourceData: { [key: string]: number } = {};
+
+        jobs.forEach((job) => {
+            const source = job.sourceLink || "Unknown";
+            sourceData[source] = (sourceData[source] || 0) + 1;
+        });
+
+        const barChartData = Object.keys(sourceData).map((source) => ({
+            source,
+            jobs: sourceData[source],
+        }));
+
+        return sendResponse(res, 200, true, "Jobs by source fetched successfully", barChartData);
+    } catch (error) {
+        console.error("Error fetching jobs by source:", error);
+        return sendResponse(res, 500, false, "Server error while fetching jobs by source");
+    }
+};
