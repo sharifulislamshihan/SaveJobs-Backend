@@ -53,9 +53,6 @@ export const verificationEmailTemplate = (name:string, verificationCode:string) 
          </head>
          <body>
              <div class="container">
-                 <div class="image-section">
-                     <img src="https://res.cloudinary.com/drdgi9qdu/image/upload/v1727289698/SC7XrUHmR5CIgmQ-XWvE5Q-removebg-preview_rso636.png" width="400" height="200" alt="Whisper Logo" />
-                 </div>
                  <h1>Verify your Email address</h1>
                  <p>Hello ${name},</p>
                  <p>
