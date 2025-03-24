@@ -9,7 +9,7 @@ export const authenticate = async (req: AuthenticatedRequest, res: Response, nex
         // Get token from Authorization header
         const authHeader = req.headers.authorization;
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
-            return sendResponse(res, 401, false, 'Unauthorized: No token provided');
+            return sendResponse(res, 401, false, 'Session expired. Please login again.');
         }
 
         // Extract token
@@ -25,14 +25,26 @@ export const authenticate = async (req: AuthenticatedRequest, res: Response, nex
                 email: string; 
                 name: string;
             };
-            console.log("user form auth middleware", req.user);
+
+            // Check if user ID exists
+            if (!req.user?.id) {
+                return sendResponse(res, 401, false, 'Access denied. Please login again.');
+            }
+
+            console.log("User authenticated:", req.user);
             
             next();
         } catch (error) {
-            return sendResponse(res, 401, false, 'Invalid or expired token');
+            // Clear any existing tokens/cookies
+            res.clearCookie('refreshToken', {
+                httpOnly: true,
+                sameSite: 'strict'
+            });
+            
+            return sendResponse(res, 401, false, 'Session invalid. Please login again.');
         }
     } catch (error) {
         console.error('Auth Middleware Error:', error);
-        return sendResponse(res, 500, false, 'Authentication error');
+        return sendResponse(res, 500, false, 'Authentication failed. Please try again.');
     }
 };

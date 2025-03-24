@@ -135,13 +135,13 @@ export const resendVerificationCodeEmail = async (req: Request, res: Response) =
     console.log("Email for resend verification code", email);
     try {
         // Find the user by email
-        const user = await UserModel.findOne({ 
-            email: email 
+        const user = await UserModel.findOne({
+            email: email
         });
 
         // Check if user exists
         console.log("User", user);
-        
+
 
         if (!user) {
             return sendResponse(res, 404, false, "User not found");
@@ -155,7 +155,7 @@ export const resendVerificationCodeEmail = async (req: Request, res: Response) =
         // Generate a new verification code and update expiration time
         const verificationCode = generateVerificationCode();
         console.log("Verification code in resend", verificationCode);
-        
+
         user.verificationCode = verificationCode;
         user.verificationCodeExpiration = new Date(Date.now() + 10 * 60 * 1000);
 
@@ -259,7 +259,7 @@ export const forgetPassword = async (req: Request, res: Response) => {
     try {
         const { email } = req.body;
         console.log("Forget password request received");
-        
+
 
         // Check if user exists
         const user = await UserModel.findOne({
@@ -311,8 +311,8 @@ export const resetPassword = async (req: Request, res: Response) => {
         console.log("Email", email);
         console.log("Verification Code", verificationCode);
         console.log("New Password", newPassword);
-        
-        
+
+
         // Find user and verify code
         const user = await UserModel.findOne({ email });
 
