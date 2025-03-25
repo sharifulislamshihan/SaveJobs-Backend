@@ -15,7 +15,7 @@ const app: Express = express();
 
 // middleware
 app.use(cors({
-    origin: 'http://localhost:3000', // frontend URL
+    origin: 'https://savejobs.vercel.app/', // frontend URL
     credentials: true, // using cookies/auth
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization']
