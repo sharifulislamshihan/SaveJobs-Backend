@@ -81,7 +81,7 @@ export const verifyCode = async (req: Request, res: Response) => {
 
         const { email, verificationCode } = req.body;
 
-        console.log(email, verificationCode);
+        ////console.log(email, verificationCode);
 
         // Check if required fields are provided
         if (!email || !verificationCode) {
@@ -94,9 +94,9 @@ export const verifyCode = async (req: Request, res: Response) => {
             email: email
         });
 
-        console.log("user status", user);
+        //console.log("user status", user);
 
-        console.log("1");
+        //console.log("1");
 
         // Handle user not found
         if (!user) {
@@ -132,7 +132,7 @@ export const verifyCode = async (req: Request, res: Response) => {
 // Resend Verification code
 export const resendVerificationCodeEmail = async (req: Request, res: Response) => {
     const { email } = req.body;
-    console.log("Email for resend verification code", email);
+    //console.log("Email for resend verification code", email);
     try {
         // Find the user by email
         const user = await UserModel.findOne({
@@ -140,7 +140,7 @@ export const resendVerificationCodeEmail = async (req: Request, res: Response) =
         });
 
         // Check if user exists
-        console.log("User", user);
+        //console.log("User", user);
 
 
         if (!user) {
@@ -154,7 +154,7 @@ export const resendVerificationCodeEmail = async (req: Request, res: Response) =
 
         // Generate a new verification code and update expiration time
         const verificationCode = generateVerificationCode();
-        console.log("Verification code in resend", verificationCode);
+        //console.log("Verification code in resend", verificationCode);
 
         user.verificationCode = verificationCode;
         user.verificationCodeExpiration = new Date(Date.now() + 10 * 60 * 1000);
@@ -180,9 +180,9 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     const { email, password } = req.body;
 
     try {
-        console.log("Login request received");
-        console.log("Email", email);
-        console.log("Password", password);
+        //console.log("Login request received");
+        //console.log("Email", email);
+        //console.log("Password", password);
 
 
 
@@ -216,7 +216,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         });
 
         // Log user in checking
-        console.log(`User ${user.email} logged in successfully`);
+        //console.log(`User ${user.email} logged in successfully`);
 
         // Send response
         res.status(200).json({
@@ -258,7 +258,7 @@ export const logout = async (req: Request, res: Response) => {
 export const forgetPassword = async (req: Request, res: Response) => {
     try {
         const { email } = req.body;
-        console.log("Forget password request received");
+        //console.log("Forget password request received");
 
 
         // Check if user exists
@@ -307,10 +307,10 @@ export const resetPassword = async (req: Request, res: Response) => {
             );
         }
 
-        console.log("Reset password request received");
-        console.log("Email", email);
-        console.log("Verification Code", verificationCode);
-        console.log("New Password", newPassword);
+        //console.log("Reset password request received");
+        //console.log("Email", email);
+        //console.log("Verification Code", verificationCode);
+        //console.log("New Password", newPassword);
 
 
         // Find user and verify code
@@ -355,7 +355,7 @@ export const getMe = async (req: Request, res: Response) => {
         // Extract user info from request (added by the authenticate middleware)
         const userId = (req as any).user?.id;
 
-        console.log("this is the user id", userId);
+        //console.log("this is the user id", userId);
 
         // Check if user ID is present
         if (!userId) {

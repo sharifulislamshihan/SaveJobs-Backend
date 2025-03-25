@@ -18,7 +18,7 @@ const model: GenerativeModel = genAI.getGenerativeModel({
 export const analyzeData = async (inputText: string): Promise<string> => {
     const promptTemplate: string = geminiPrompt.replace("{{input}}", inputText)
     try {
-        console.log(promptTemplate);
+        //console.log(promptTemplate);
         
         // Generate content using the model
         const result = await model.generateContent(promptTemplate);
@@ -30,7 +30,7 @@ export const analyzeData = async (inputText: string): Promise<string> => {
         // converting into js object
         const jobData = JSON.parse(cleanJsonString);
 
-        console.log(jobData);
+        //console.log(jobData);
         return jobData;
         
     } catch (error: any) {

@@ -21,7 +21,7 @@ export const sendVerificationCodeEmail = async (name: string, email: string, ver
         // template for verification code
         const emailHTML = verificationEmailTemplate(name, verificationCode);
 
-        console.log("Email Template", emailHTML);
+        //console.log("Email Template", emailHTML);
 
 
         // sending email
@@ -32,7 +32,7 @@ export const sendVerificationCodeEmail = async (name: string, email: string, ver
             html: emailHTML, // The HTML content of your email (rendered from your template)
         });
 
-        console.log("email sent successfully to ", email);
+        //console.log("email sent successfully to ", email);
 
         return {
             status: 200,

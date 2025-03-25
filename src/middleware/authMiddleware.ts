@@ -31,7 +31,7 @@ export const authenticate = async (req: AuthenticatedRequest, res: Response, nex
                 return sendResponse(res, 401, false, 'Access denied. Please login again.');
             }
 
-            console.log("User authenticated:", req.user);
+            //console.log("User authenticated:", req.user);
             
             next();
         } catch (error) {

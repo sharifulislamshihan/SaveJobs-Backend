@@ -4,7 +4,7 @@ let generatedMessage: string = "";
 export const setGeneratedMessage = (message: string): void => {
     generatedMessage = message;
 
-    //console.log("message set successfully", generatedMessage);
+    ////console.log("message set successfully", generatedMessage);
     
 };
 
@@ -12,6 +12,6 @@ export const setGeneratedMessage = (message: string): void => {
 
 export const getGeneratedMessage = (): string => {
     return generatedMessage;
-    console.log("getting message", generatedMessage);
+    //console.log("getting message", generatedMessage);
     
 };

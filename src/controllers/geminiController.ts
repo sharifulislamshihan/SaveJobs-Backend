@@ -6,8 +6,8 @@ import { AuthenticatedRequest } from "../customType/types";
 
 export const processGeminiRequest = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const { prompt, id } = req.body;
-    console.log("Prompt in the process :", prompt);
-    console.log("Id in the process :",id);
+    //console.log("Prompt in the process :", prompt);
+    //console.log("Id in the process :",id);
 
 
 
@@ -17,7 +17,7 @@ export const processGeminiRequest = async (req: AuthenticatedRequest, res: Respo
     }
 
     try {
-        //console.log(prompt);
+        ////console.log(prompt);
 
         const result = await analyzeData(prompt);
 
@@ -28,7 +28,7 @@ export const processGeminiRequest = async (req: AuthenticatedRequest, res: Respo
             return sendResponse(res, 401, false, "User id is missing.");
         }
 
-        console.log("User info in processGeminiRequest id:", id); // Debug log
+        //console.log("User info in processGeminiRequest id:", id); // Debug log
 
         // Save the job to the user's document
         await createJobForUser(id, result); // Pass user ID and the generated job data

@@ -11,8 +11,8 @@ export const createJobForUser = async (userId: string, jobData: any): Promise<vo
     try {
         // Create a new job entry in the Job collection
         // jobData is the result from Gemini
-        console.log("this is the job data", jobData);
-        console.log("this is the user id", userId);
+        //console.log("this is the job data", jobData);
+        //console.log("this is the user id", userId);
 
 
         const newJob = new JobModel(jobData);
@@ -24,9 +24,9 @@ export const createJobForUser = async (userId: string, jobData: any): Promise<vo
         });
 
 
-        // console.log("Getting the Job Data", jobData);
-        // console.log("company from jobData", jobData.company);
-        //console.log("Job created successfully for user with ID:", userId);
+        // //console.log("Getting the Job Data", jobData);
+        // //console.log("company from jobData", jobData.company);
+        ////console.log("Job created successfully for user with ID:", userId);
 
 
     } catch (error: any) {
@@ -44,7 +44,7 @@ export const getUserJobs = async (req: AuthenticatedRequest, res: Response): Pro
         // Extract userId from the request parameters
         const userid = req.user?.id;
 
-        console.log("getting user jobs", userid);
+        //console.log("getting user jobs", userid);
         // Check if userId is valid
         if (!userid) {
             return sendResponse(res, 400, false, "User ID is required");
@@ -55,7 +55,7 @@ export const getUserJobs = async (req: AuthenticatedRequest, res: Response): Pro
             .populate('jobs')
             .exec();
 
-        console.log("user in the backend fot get users job", user);
+        //console.log("user in the backend fot get users job", user);
 
         // Handle case where user is not found
         if (!user) {
@@ -77,7 +77,7 @@ export const getUserJobs = async (req: AuthenticatedRequest, res: Response): Pro
 export const getSingleJob = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
         const jobId = req.params.id;
-        console.log("job id in the get single job", jobId);
+        //console.log("job id in the get single job", jobId);
 
         const userId = req.user?.id;
 
