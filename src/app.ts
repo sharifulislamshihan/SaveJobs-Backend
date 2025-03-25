@@ -4,8 +4,6 @@ import { errorResponse } from "./utils/errorResponse";
 import authRouter from "./routes/authRoutes";
 import jobRouter from "./routes/jobRoutes";
 import { userRouter } from "./routes/userRoutes";
-import { toNodeHandler, fromNodeHeaders } from "better-auth/node";
-import { auth } from "./lib/auth";
 import cors from 'cors';
 
 dotenv.config();
