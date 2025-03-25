@@ -9,9 +9,11 @@ import { sendVerificationCodeEmail } from '../utils/sendVerificationCode';
 
 // register and send verification code
 export const registerUser = async (req: Request, res: Response) => {
+    //const start = Date.now();
+
     try {
         const { name, email, password, image } = req.body;
-
+        //console.log(`Validation start: ${Date.now() - start}ms`);
 
         // Getting error while keeping this regex in the userModel because of hashing password
         // Validate password before hashing
@@ -24,8 +26,12 @@ export const registerUser = async (req: Request, res: Response) => {
                 "Password must be at least 6 characters long and include at least one letter and one number"
             );
         }
+        //console.log(`Password validation took: ${Date.now() - start}ms`);
 
-        const existingUser = await UserModel.findOne({ email });
+        const existingUser = await UserModel.findOne({ email }).lean(); // Use lean() for faster query;
+
+        //console.log(`User check took: ${Date.now() - start}ms`);
+
         if (existingUser) {
             return sendResponse(res, 400, false, "Email already in use");
         }
@@ -33,8 +39,12 @@ export const registerUser = async (req: Request, res: Response) => {
         const verificationCode = generateVerificationCode();
         const verificationCodeExpiration = new Date(Date.now() + 10 * 60 * 1000);
 
+        //console.log(`Verification code generation took: ${Date.now() - start}ms`);
+
         // Hash Password AFTER validation
-        const hashedPassword = await bcrypt.hash(password, 10);
+        const hashedPassword = await bcrypt.hash(password, 6);
+
+        //console.log(`Password hashing took: ${Date.now() - start}ms`);
 
         // Create new user
         const newUser = new UserModel({
@@ -50,18 +60,19 @@ export const registerUser = async (req: Request, res: Response) => {
 
         const savedUser = await newUser.save();
 
+        //console.log(`User save took: ${Date.now() - start}ms`);
+
         if (!savedUser) {
             return sendResponse(res, 500, false, "Failed to save user");
         }
 
-        // Send verification code
-        try {
-            await sendVerificationCodeEmail(name, email, verificationCode);
-            return sendResponse(res, 201, true, "User created successfully");
-        } catch (emailError) {
-            console.error("Email sending error:", emailError);
-            return sendResponse(res, 201, true, "User created but email verification failed");
-        }
+        // Send verification code {avoid await here and send async response to make the process faster}
+        sendVerificationCodeEmail(name, email, verificationCode)
+            .then(() => console.log("Verification code sent successfully"))
+            .catch((error) => console.error("Email sending error:", error));
+
+        // Return response immediately to avoid waiting for email sending
+        return sendResponse(res, 201, true, "User created successfully");
 
     } catch (error) {
         console.error("Register User Error:", {
@@ -78,7 +89,6 @@ export const registerUser = async (req: Request, res: Response) => {
 export const verifyCode = async (req: Request, res: Response) => {
 
     try {
-
         const { email, verificationCode } = req.body;
 
         ////console.log(email, verificationCode);
@@ -90,9 +100,7 @@ export const verifyCode = async (req: Request, res: Response) => {
 
 
         // Find the user in the database
-        const user = await UserModel.findOne({
-            email: email
-        });
+        const user = await UserModel.findOne({ email }).lean();
 
         //console.log("user status", user);
 
@@ -114,10 +122,19 @@ export const verifyCode = async (req: Request, res: Response) => {
         }
 
         // Set the user as verified and clear verification data
-        user.isVerified = true;
-        user.verificationCode = null;
-        user.verificationCodeExpiration = null;
-        await user.save();
+        // updating specific fields in mongoose to reduce the number of queries and make it fast
+        await UserModel.updateOne(
+            { email },
+            {
+                isVerified: true,
+                verificationCode: null,
+                verificationCodeExpiration: null
+            }
+        );
+        // user.isVerified = true;
+        // user.verificationCode = null;
+        // user.verificationCodeExpiration = null;
+        // await user.save();
 
         // Send a success response
         return sendResponse(res, 200, true, "User verified successfully");
@@ -131,13 +148,13 @@ export const verifyCode = async (req: Request, res: Response) => {
 
 // Resend Verification code
 export const resendVerificationCodeEmail = async (req: Request, res: Response) => {
-    const { email } = req.body;
-    //console.log("Email for resend verification code", email);
+    //const start = Date.now();
+
     try {
+
+        const { email } = req.body;
         // Find the user by email
-        const user = await UserModel.findOne({
-            email: email
-        });
+        const user = await UserModel.findOne({ email }).lean();
 
         // Check if user exists
         //console.log("User", user);
@@ -155,12 +172,19 @@ export const resendVerificationCodeEmail = async (req: Request, res: Response) =
         // Generate a new verification code and update expiration time
         const verificationCode = generateVerificationCode();
         //console.log("Verification code in resend", verificationCode);
+        //console.log(`Verification code generation took: ${Date.now() - start}ms`);
 
         user.verificationCode = verificationCode;
         user.verificationCodeExpiration = new Date(Date.now() + 10 * 60 * 1000);
 
-        // Save the updated user data
-        await user.save();
+        await UserModel.updateOne(
+            { email },
+            {
+                verificationCode: verificationCode,
+                verificationCodeExpiration: new Date(Date.now() + 10 * 60 * 1000)
+            }
+        );
+        //console.log(`User update took: ${Date.now() - start}ms`);
 
         // Send verification email using user's name from database
         await sendVerificationCodeEmail(user.name, email, verificationCode);
@@ -177,17 +201,20 @@ export const resendVerificationCodeEmail = async (req: Request, res: Response) =
 // Login
 
 export const login = async (req: Request, res: Response): Promise<void> => {
-    const { email, password } = req.body;
 
+    //const start = Date.now();
     try {
+
+        const { email, password } = req.body;
         //console.log("Login request received");
         //console.log("Email", email);
         //console.log("Password", password);
 
 
-
         // Check if user exists
-        const user = await UserModel.findOne({ email });
+        const user = await UserModel.findOne({ email }).lean();
+        //console.log(`User fetch took: ${Date.now() - start}ms`);
+
         if (!user) {
             return sendResponse(res, 401, false, 'Invalid email or password')
         }
@@ -199,13 +226,16 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
         // Compare passwords
         const isMatch = await bcrypt.compare(password, user.password);
+        //console.log(`Password comparison took: ${Date.now() - start}ms`);
         if (!isMatch) {
-            return sendResponse(res, 401, false, 'Invalid email or password')
+            return sendResponse(res, 401, false, "Invalid email or password");
         }
 
         // Generate tokens
         const accessToken = generateAccessToken(user._id as string);
         const refreshToken = generateRefreshToken(user._id as string);
+
+        //console.log(`Token generation took: ${Date.now() - start}ms`);
 
         // Set refresh token in cookie
         res.cookie('refreshToken', refreshToken, {
@@ -363,7 +393,7 @@ export const getMe = async (req: Request, res: Response) => {
         }
 
         // Fetch user details from DB
-        const user = await UserModel.findById(userId).select('-password'); // Exclude password from response
+        const user = await UserModel.findById(userId).select('-password').lean(); // Exclude password from response
 
         if (!user) {
             return sendResponse(res, 404, false, 'User not found');

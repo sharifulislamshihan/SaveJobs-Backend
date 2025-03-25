@@ -17,20 +17,12 @@ const app: Express = express();
 app.use(cors({
     origin: 'http://localhost:3000', // frontend URL
     credentials: true, // using cookies/auth
-    // methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-    // allowedHeaders: ['Content-Type', 'Authorization']
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+    allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-app.all("/api/auth/*", toNodeHandler(auth));
 
-// app.get("/api/me", async (req: Request, res: Response): Promise<void>{
-//     const session = await auth.api.getSession({
-//         headers: fromNodeHeaders(req.headers),
-//     });
-
-//     res.json(session);
-// });
-
+// Routes
 
 app.use(express.json());
 

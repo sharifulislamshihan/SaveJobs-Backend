@@ -80,6 +80,10 @@ const userSchema: Schema<IUser> = new Schema(
     { timestamps: true }
 );
 
+// Adding index to speedup in queries
+userSchema.index({ email: 1 }, { unique: true });
+userSchema.index({ isVerified: 1 }); 
+
 // Create and export User model
 const UserModel = mongoose.model<IUser>('User', userSchema);
 

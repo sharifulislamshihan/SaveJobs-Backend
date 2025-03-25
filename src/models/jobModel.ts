@@ -19,17 +19,17 @@ const jobSchema: Schema = new Schema(
         perksAndBenefits: { type: [String], default: [] },
         applicationLink: { type: String, default: '' },
         // Status field indicating the job application state
-        status: { 
-            type: String, 
+        status: {
+            type: String,
             enum: ['Not Applied', 'Applied', 'Interview Scheduled', 'Rejected', 'Accepted'],
             default: 'Not Applied'
         },
         sourceLink: { type: String, default: '' },
         applyLink: { type: String, default: '' },
-        instruction: {type: String, default: ''},
+        instruction: { type: String, default: '' },
         hrEmail: { type: String, default: '' },
         interviewDate: { type: Date, default: null },  // Store interview date if applicable
-        notes: {type: String, default: ''},
+        notes: { type: String, default: '' },
     },
     { timestamps: true }
 );
@@ -38,17 +38,14 @@ const jobSchema: Schema = new Schema(
 
 
 // Adding indexes to improve query performance
-// for future work
-
-jobSchema.index({ status: 1 });  
-//helps speed up queries like "Find jobs with status = 'Not Applied'
-
-
-jobSchema.index({ applicationDeadline: 1 });  
-// helps with queries like "Find expired jobs" or "Find jobs with upcoming deadlines"
-
-jobSchema.index({ createdAt: -1 });  
-// helps with queries like "Find the latest job postings"
+jobSchema.index({ status: 1 });
+jobSchema.index({ applicationDeadline: 1 });
+jobSchema.index({ createdAt: -1 });
+jobSchema.index({ user: 1 }); 
+jobSchema.index({ company: 1 }); 
+jobSchema.index({ position: 1 }); 
+jobSchema.index({ location: 1 }); 
+jobSchema.index({ skillsRequired: 1 }); 
 
 // Create Job model
 const JobModel = mongoose.model<Document>('Job', jobSchema);
