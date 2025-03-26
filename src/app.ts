@@ -12,14 +12,13 @@ const app: Express = express();
 
 
 
-// app.use(cors({
-//     origin: 'https://savejobs.vercel.app', // frontend URL
-//     credentials: true, // using cookies/auth
-//     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-//     allowedHeaders: ['Content-Type', 'Authorization'],
-// }));
+app.use(cors({
+    origin: true, // allow all origins
+    credentials: true, // using cookies/auth
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+}));
 
-app.use(cors());
 
 
 // Routes
