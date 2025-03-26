@@ -32,7 +32,7 @@ const userSchema: Schema<IUser> = new Schema(
             unique: true,
             lowercase: true,
             match: [
-                /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/,
+                /^.{6}$/,
                 'Please provide a valid email address',
             ],
         },
