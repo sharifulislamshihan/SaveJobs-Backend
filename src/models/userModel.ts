@@ -32,7 +32,7 @@ const userSchema: Schema<IUser> = new Schema(
             unique: true,
             lowercase: true,
             match: [
-                /^.{6}$/,
+                /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/,
                 'Please provide a valid email address',
             ],
         },
@@ -40,7 +40,7 @@ const userSchema: Schema<IUser> = new Schema(
             type: String,
             required: [true, 'Password is required'],
             match: [
-                /^(?=.*[a-zA-Z])(?=.*\d).*$/,
+                /^.{6}$/,
                 'Password must be at least 6 characters long and include at least one letter and one number',
             ],
             minlength: 6, // Keep minimum length rule
